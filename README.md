@@ -13,10 +13,12 @@ angry, etc.).
 
 ## Skills learned/practice through this project
 
-• In this project, I have learnt about the concept of sentiment analysis and implemented it over the
+- In this project, I have learnt about the concept of sentiment analysis and implemented it over the
 dataset of Jane Austen’s books.
-• first I have perform the data wrangling on the given dataset to make the data in the proper format for
+- first I have perform the data wrangling on the given dataset to make the data in the proper format for
 analysis.
-• After that, create the different visualizations on the sentiment scores to present the findings in the
+- After that, create the different visualizations on the sentiment scores to present the findings in the
 more compelling way.
+
+![image](https://github.com/Sid-TheAnalyst/Sentiment-analysis-with-R/blob/main/Customer%20Sentiment%20Analysis/Poster_Image.png)
 
