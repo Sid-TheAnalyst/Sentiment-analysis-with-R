@@ -1,0 +1,153 @@
+---
+title: "Sentiment Analysis Project in R"
+author: "Siddharth Prajapati"
+date: "31st-July-2023"
+output:
+  pdf_document: 
+  html_document: default
+---
+
+## __1) Introduction__   
+
+*Sentiment Analysis is a process of extracting opinions that have different polarities*. By polarities, we mean positive, negative or neutral. It is also known as opinion mining and polarity detection. With the help of sentiment analysis, you can find out the nature of opinion that is reflected in documents, websites, social media feed, etc. Sentiment Analysis is a type of classification where the data is classified into different classes. These classes can be binary in nature (positive or negative) or, they can have multiple classes (happy, sad, angry, etc.).
+
+##### __Important:__   
+The goal of this project is to practice the data cleaning, data manipulation & data visualization techniques using R.I do not claim copyright over any of the content here.  
+
+##### __Source:__ https://data-flair.training/blogs/data-science-r-sentiment-analysis-project/
+
+## __2) Understanding the data set__  
+
+In this project, I have carry out sentiment analysis with R. The dataset that I have used here is provided by the R package ‘janeaustenR’.  
+
+austen_books is a data frame of Jane Austen's 6 completed, published novels with two columns: __text__, which contains the text of the novels divided into elements of up to about 70 characters each, and __book__, which contains the titles of the novels as a factor in order of publication.
+  
+![](/Users/Admin\OneDrive\Documents\R Portfolio Projects\Data_table_snap.png)
+```{r}
+#load the dataset
+library(janeaustenr)
+
+# get the summary of dataset
+summary(austen_books())
+```
+\newpage
+## __3) Developing Sentiment Analysis Model in R__  
+
+In order to build the project on sentiment analysis, I had use of the *tidytext* package that comprises of sentiment lexicons that are present in the dataset of *sentiments*.   
+   
+A sentiment lexicon is a collection of words (also known as polar or opinion words) associated with their sentiment orientation, that is, positive or negative.
+
+In this project, I have use the __bing lexicons__ to extract the sentiments out of our data. 
+
+```{r}
+# load the dataset
+library(tidytext)
+
+# view the bing sentiments data
+get_sentiments("bing")
+```
+```{r}
+tail(get_sentiments("bing"))
+```
+\newpage
+## __4) Data Wrangling__   
+
+In this step, I have used the data wrangling techniques to prepare the data for further analysis.   
+
+The *austen_books* data will provide the text of the novel in one column which is *text*. 
+
+*Tidytext* package helped me to perform efficient text analysis on our data. I have convert the text of our books into a tidy format using "unnest_tokens()" function. 
+
+*tidyverse* package helped me to do the data processing efficiently.
+
+
+```{r}
+library(tidyverse)
+
+tidy_data <- austen_books() %>% 
+             group_by(book) %>%
+             mutate(linenumber = row_number(),  
+             chapter = cumsum(str_detect(text,regex("^chapter [\\divxlc]",
+                                                           ignore_case=TRUE)))) %>% 
+             ungroup() %>% 
+             unnest_tokens(word,text)
+head(tidy_data,10)
+
+```
+\newpage
+### __Understanding the above code__    
+ 
+ 
+__group_by(book) %>%__  
+This line groups the data by the book column, which means that subsequent operations will be applied separately to each book in the dataset.
+
+__mutate(linenumber = row_number()__  ,
+This line adds a new column called linenumber to the dataset. The row_number() function generates a sequential number for each row, which will represent the line number of the text.
+
+__chapter = cumsum(str_detect(text,regex("^chapter [\\divxlc]", ignore_case=TRUE)))) %>%__  
+This line creates another new column called chapter. It uses the str_detect function with a regular expression to identify lines that start with "chapter" (ignoring case). The cumsum function then calculates the cumulative sum of the results (1 for lines starting with "chapter" and 0 for others). This creates a sequence that increments whenever a new chapter begins.
+
+__ungroup() %>%__  
+This line ungroups the data, which means that subsequent operations will be applied to the entire dataset as a whole, rather than by individual book groups.
+
+__unnest_tokens(word,text)__  
+This line tokenizes the text column, which means it breaks down the text into individual words and stores them in a new column called word. This process effectively separates the text into a tidy format where each row represents a single word.
+
+In summary, the code takes a dataset containing the text of various books by Jane Austen, groups it by book, adds columns for line numbers and chapters, ungroups the data, and finally tokenizes the text into individual words, resulting in a tidy dataset with one word per row along with information about the line number and the chapter the word belongs to.
+
+__After that I have proceed towards counting the most common positive and negative words that are present in the tidy_data.__
+
+```{r message=FALSE, warning=FALSE}
+bing <- get_sentiments("bing")
+
+counting_words <- tidy_data %>%
+                  inner_join(bing) %>%
+                  count(word, sentiment, sort = TRUE)
+head(counting_words)
+```
+\newpage
+## __4) Data Visualization__  
+
+In the next step, we I have perform visualization of our sentiment score. I have plot the scores along the axis that is labeled with both positive as well as negative words. I have use ggplot() function to visualize our data based on their scores.  
+
+```{r}
+counting_words %>%
+ filter(n > 150) %>%
+ mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
+ mutate(word = reorder(word, n)) %>%
+ ggplot(aes(word, n, fill = sentiment))+
+ geom_col() +
+ coord_flip() +
+ labs(y = "Sentiment Score")
+```
+\newpage
+In the final visualization, I had created a wordcloud that will describe the most recurring positive and negative words. In particular, I have use the 'comparision.cloud()' function to plot both negative and positive words in a single wordcloud as follows:  
+
+```{r message=FALSE, warning=FALSE}
+library(reshape2)
+library(wordcloud)
+tidy_data %>%
+ inner_join(bing) %>%
+ count(word, sentiment, sort = TRUE) %>%
+ acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+ comparison.cloud(colors = c("red", "dark green"),
+          max.words = 100)
+```
+
+
+## __5) Summary__  
+
+* In this project, I have learnt about the concept of sentiment analysis and implemented it over the dataset of Jane Austen’s books.
+* first I have perform the data wrangling on the given dataset to make the data in the proper format for analysis.
+* After that, create the different visualizations on the sentiment scores to present the findings in the more compelling way.
+
+
+
+
+
+ 
+
+
+
+
+
